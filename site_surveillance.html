@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>programe babouche - Temps Réel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.8s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0,255,136,0.5);
+        }
+        
+        .connection-bar {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .connection-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4444;
+            transition: all 0.3s ease;
+        }
+        
+        .status-dot.connected {
+            background: #00ff88;
+            box-shadow: 0 0 15px rgba(0,255,136,0.6);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        .config-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            animation: slideUp 0.8s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .config-section h3 {
+            margin-bottom: 20px;
+            color: #00ff88;
+            font-size: 1.3rem;
+        }
+        
+        .connection-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        input {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(0,255,136,0.3);
+            border-radius: 15px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 16px;
+            min-width: 300px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+        
+        input::placeholder {
+            color: #aaa;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,255,136,0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,255,136,0.4);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            animation: zoomIn 0.8s ease;
+        }
+        
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .video-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .video-section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .video-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .video-container {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(0,255,136,0.3);
+        }
+        
+        .video-container img {
+            width: 100%;
+            height: auto;
+            max-height: 400px;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+        
+        .placeholder {
+            color: #666;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .live-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.6; }
+        }
+        
+        .fps-counter {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: #00ff88;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #ccc;
+        }
+        
+        .error-message {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            animation: shake 0.5s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .connection-form {
+                flex-direction: column;
+            }
+            
+            input {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖕programe babouche </h1>
+            <p>Diffusion en temps réel • Haute qualité • Surveillance continue</p>
+        </div>
+        
+        <div class="connection-bar">
+            <div class="connection-status">
+                <div class="status-item">
+                    <div class="status-dot" id="connectionDot"></div>
+                    <span id="connectionText">Non connecté</span>
+                </div>
+                <div class="status-item">
+                    <span>📊 FPS: <span id="fpsDisplay">0</span></span>
+                </div>
+                <div class="status-item">
+                    <span>⏰ <span id="currentTime"></span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="config-section">
+            <h3>🔗 Connexion à l'ordinateur</h3>
+            <div class="connection-form">
+                <input type="text" id="serverIP" placeholder="Adresse IP de l'ordinateur (ex: 192.168.1.100)" value="192.168.1.100">
+                <button onclick="connect()" id="connectBtn">Se connecter</button>
+                <button onclick="disconnect()" id="disconnectBtn" style="background: #ff4444; display: none;">Déconnecter</button>
+            </div>
+        </div>
+        
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        
+        <div class="video-grid">
+            <!-- Caméra -->
+            <div class="video-section">
+                <h2>📷 Vue de la cible</h2>
+                <div class="video-container">
+                    <img id="cameraStream" style="display: none;" alt="Flux caméra">
+                    <div id="cameraPlaceholder" class="placeholder">📷 Caméra en attente de connexion</div>
+                    <div class="live-indicator" id="cameraLive">🔴 LIVE</div>
+                    <div class="fps-counter" id="cameraFps">0 FPS</div>
+                </div>
+                <div class="stats">
+                    <span>Dernière image: <span id="cameraTime">jamais</span></span>
+                    <span>Qualité: HD</span>
+                </div>
+            </div>
+            
+            <!-- Écran -->
+            <div class="video-section">
+                <h2>🖥️ Écran de l'ordinateur</h2>
+                <div class="video-container">
+                    <img id="screenStream" style="display: none;" alt="Flux écran">
+                    <div id="screenPlaceholder" class="placeholder">🖥️ Écran en attente de connexion</div>
+                    <div class="live-indicator" id="screenLive">🔴 LIVE</div>
+                    <div class="fps-counter" id="screenFps">0 FPS</div>
+                </div>
+                <div class="stats">
+                    <span>Dernière image: <span id="screenTime">jamais</span></span>
+                    <span>Résolution: 800x600</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let isConnected = false;
+        let frameCount = 0;
+        let startTime = Date.now();
+        
+        // Récupérer l'IP sauvegardée
+        const savedIP = localStorage.getItem('serverIP');
+        if (savedIP) {
+            document.getElementById('serverIP').value = savedIP;
+        }
+        
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleTimeString();
+        }
+        
+        function updateFPS() {
+            const elapsed = (Date.now() - startTime) / 1000;
+            const fps = Math.round(frameCount / elapsed);
+            document.getElementById('fpsDisplay').textContent = fps;
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function updateConnectionStatus(connected) {
+            const dot = document.getElementById('connectionDot');
+            const text = document.getElementById('connectionText');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            if (connected) {
+                dot.classList.add('connected');
+                text.textContent = '🟢 Connecté en temps réel';
+                connectBtn.style.display = 'none';
+                disconnectBtn.style.display = 'inline-block';
+                
+                // Afficher les indicateurs live
+                document.getElementById('cameraLive').style.display = 'block';
+                document.getElementById('screenLive').style.display = 'block';
+            } else {
+                dot.classList.remove('connected');
+                text.textContent = '🔴 Non connecté';
+                connectBtn.style.display = 'inline-block';
+                disconnectBtn.style.display = 'none';
+                
+                // Masquer les indicateurs live
+                document.getElementById('cameraLive').style.display = 'none';
+                document.getElementById('screenLive').style.display = 'none';
+            }
+            
+            isConnected = connected;
+        }
+        
+        function connect() {
+            const ip = document.getElementById('serverIP').value.trim();
+            if (!ip) {
+                showError('Veuillez entrer une adresse IP');
+                return;
+            }
+            
+            // Sauvegarder l'IP
+            localStorage.setItem('serverIP', ip);
+            
+            const wsUrl = `ws://${ip}:8765`;
+            
+            try {
+                websocket = new WebSocket(wsUrl);
+                
+                websocket.onopen = function() {
+                    console.log('🔗 Connexion WebSocket établie');
+                    updateConnectionStatus(true);
+                    frameCount = 0;
+                    startTime = Date.now();
+                };
+                
+                websocket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === 'frames') {
+                            frameCount++;
+                            updateFPS();
+                            
+                            // Mettre à jour l'écran
+                            if (data.screen) {
+                                const screenImg = document.getElementById('screenStream');
+                                const screenPlaceholder = document.getElementById('screenPlaceholder');
+                                
+                                screenImg.src = data.screen;
+                                screenImg.style.display = 'block';
+                                screenPlaceholder.style.display = 'none';
+                                
+                                document.getElementById('screenTime').textContent = new Date().toLocaleTimeString();
+                            }
+                            
+                            // Mettre à jour la caméra
+                            if (data.camera) {
+                                const cameraImg = document.getElementById('cameraStream');
+                                const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+                                
+                                cameraImg.src = data.camera;
+                                cameraImg.style.display = 'block';
+                                cameraPlaceholder.style.display = 'none';
+                                
+                                document.getElementById('cameraTime').textContent = new Date().toLocaleTimeString();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Erreur traitement message:', error);
+                    }
+                };
+                
+                websocket.onclose = function() {
+                    console.log('❌ Connexion fermée');
+                    updateConnectionStatus(false);
+                    showError('Connexion fermée. Vérifiez que le programme tourne sur l\'ordinateur.');
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('❌ Erreur WebSocket:', error);
+                    updateConnectionStatus(false);
+                    showError(`Impossible de se connecter à ${ip}. Vérifiez l'IP et que le programme tourne.`);
+                };
+                
+            } catch (error) {
+                showError('Erreur de connexion: ' + error.message);
+            }
+        }
+        
+        function disconnect() {
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+            updateConnectionStatus(false);
+            
+            // Réinitialiser l'affichage
+            document.getElementById('screenStream').style.display = 'none';
+            document.getElementById('cameraStream').style.display = 'none';
+            document.getElementById('screenPlaceholder').style.display = 'block';
+            document.getElementById('cameraPlaceholder').style.display = 'block';
+        }
+        
+        // Mise à jour de l'heure toutes les secondes
+        setInterval(updateTime, 1000);
+        updateTime();
+        
+        // Gestion des erreurs de chargement d'images
+        document.getElementById('screenStream').onerror = function() {
+            console.log('Erreur chargement image écran');
+        };
+        
+        document.getElementById('cameraStream').onerror = function() {
+            console.log('Erreur chargement image caméra');
+        };
+        
+        // Connexion automatique si IP sauvegardée
+        window.addEventListener('load', function() {
+            const savedIP = localStorage.getItem('serverIP');
+            if (savedIP && savedIP !== '192.168.1.100') {
+                setTimeout(connect, 1000);
+            }
+        });
+        
+        // Gestion des touches
+        document.getElementById('serverIP').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connect();
+            }
+        });
+        
+        console.log('🚀 Site de surveillance chargé et prêt !');
+    </script>
+</body>
+</html>
